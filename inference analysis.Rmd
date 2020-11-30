@@ -1,0 +1,82 @@
+---
+title: "Sama Issa Basic inferential data analysis"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Overview
+
+Now in the second portion of the project, we're going to analyze the ToothGrowth data in the R datasets package.
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
+4. State your conclusions and the assumptions needed for your conclusions.
+
+## inferential data analysis
+
+### Load the ToothGrowth data and perform some basic exploratory data analyses                     
+First we load the ToothGrowth dataset
+```{r}
+data(ToothGrowth)
+```
+
+### Provide a basic summary of the data                                
+basic summary of data 
+```{r}
+str(ToothGrowth)
+summary(ToothGrowth)
+
+library(ggplot2)
+g <- ggplot(ToothGrowth, aes(x = factor(dose), y = len))
+g <- g + facet_grid(.~supp)
+g <- g + geom_boxplot(aes(fill = supp))
+g <- g + labs(title = "Tooth Length by Dosage for Every Supplement")
+g <- g + labs(x = "Dose (mg/day)", y = "Tooth Length")
+print(g)
+```
+
+### Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.
+
+```{r}
+# Comparison by delivery method for the same dosage
+t05 <- subset(ToothGrowth, dose == "0.5")
+t1 <- subset(ToothGrowth, dose == "1")
+t2 <- subset(ToothGrowth, dose == "2")
+
+## Testing Dose wise
+t05 <- t.test(len ~ supp, data = t05)
+t1 <- t.test(len ~ supp, data = t1)
+t2 <- t.test(len ~ supp, data = t2)
+
+summaryBYsupp <- data.frame(
+      "p-value" = c(t05$p.value, t1$p.value, t2$p.value),
+      "Conf.Low" = c(t05$conf.int[1],t1$conf.int[1], t2$conf.int[1]),
+      "Conf.High" = c(t05$conf.int[2],t1$conf.int[2], t2$conf.int[2]),
+      row.names = c("Dosage .05","Dosage 1","Dosage 2"))
+
+# Show the data table 
+print("Dosage .05 :")
+print(paste("    p-value :", t05$p.value))
+print(paste("    Conf.Low :", t05$conf.int[1]))
+print(paste("    Conf.High :", t05$conf.int[2]))
+
+print("Dosage 1 :")
+print(paste("    p-value :", t1$p.value))
+print(paste("    Conf.Low :", t1$conf.int[1]))
+print(paste("    Conf.High :", t1$conf.int[2]))
+
+print("Dosage 2 :")
+print(paste("    p-value :", t2$p.value))
+print(paste("    Conf.Low :", t2$conf.int[1]))
+print(paste("    Conf.High :", t2$conf.int[2]))
+
+```
+
+### State your conclusions and the assumptions needed for your conclusions                      
+
+
+OJ delivers more tooth growth than VC for dosages 0.5 & 
+1.0. OJ and VC deliver the same amount of tooth growth for 
+dose amount 2.0 mg/day.  For the entire data set we cannot conclude OJ is more effective that VC.
